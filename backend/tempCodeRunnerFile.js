@@ -1,0 +1,1 @@
+/Zync-Franc/api/v1/purchases
