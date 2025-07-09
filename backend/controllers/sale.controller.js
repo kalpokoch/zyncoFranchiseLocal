@@ -137,10 +137,29 @@ res.status(200).json({ success: true, message: "Sale updated successfully", data
 // Delete a sale
 exports.deleteSale = async (req, res) => {
     try {
-        const deletedSale = await Sale.findByIdAndDelete(req.params.id);
-        if (!deletedSale) return res.status(404).json({ success: false, message: "Sale not found" });
+        // 1. Find the sale first
+        const sale = await Sale.findById(req.params.id);
+        if (!sale) return res.status(404).json({ success: false, message: "Sale not found" });
 
-        res.status(200).json({ success: true, message: "Sale deleted successfully" });
+        // 2. Delete the sale
+        await Sale.findByIdAndDelete(req.params.id);
+
+        // 3. Update the customer's amountReceivable
+        const Customer = require("../models/customer.model");
+        let customerId = sale.customer;
+        // If customer is an object, extract _id
+        if (customerId && typeof customerId === 'object' && customerId._id) {
+            customerId = customerId._id;
+        }
+        if (customerId && sale.totalAmount) {
+            await Customer.findByIdAndUpdate(
+                customerId,
+                { $inc: { amountReceivable: -Math.abs(sale.totalAmount) } }, // Ensure subtraction
+                { new: true }
+            );
+        }
+
+        res.status(200).json({ success: true, message: "Sale deleted and customer updated successfully" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -52,6 +52,8 @@ function formatTime(date: string | Date) {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
+import { Trash2 } from 'lucide-react';
+
 const Sales: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -63,6 +65,29 @@ const Sales: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+
+  // Delete sale handler
+  const handleDeleteSale = async (saleId: string) => {
+    if (!window.confirm('Are you sure you want to delete this sale?')) return;
+    try {
+      // Call backend API
+      await import('@/api/salesApi').then(mod => mod.deleteSale(saleId));
+      setSales(prev => prev.filter(sale => sale._id !== saleId));
+      setFilteredSales(prev => prev.filter(sale => sale._id !== saleId));
+      toast({
+        title: 'Sale Deleted',
+        description: 'The sale has been deleted.',
+        variant: 'default',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to delete sale. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
 
   // Fetch sales data on mount
   useEffect(() => {
@@ -234,6 +259,7 @@ const Sales: React.FC = () => {
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>View Details</TableHead>
+                <TableHead>Delete</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -268,6 +294,16 @@ const Sales: React.FC = () => {
 }}
                     >
                       <Pencil size={18} />
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      className="text-red-500 hover:text-red-700 transition-colors rounded-full p-1 hover:bg-red-100"
+                      onClick={() => handleDeleteSale(sale._id)}
+                      title="Delete Sale"
+                    >
+                      <ExternalLink size={0} style={{display:'none'}} /> {/* To preserve import if unused */}
+                      <Trash2 size={18} />
                     </button>
                   </TableCell>
                 </TableRow>
