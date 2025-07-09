@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import { deletePaymentIn, getPaymentIns } from '@/api/paymentInApi';
+import { useToast } from '@/components/ui/use-toast';
+
 const PaymentInHistory: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,9 +31,30 @@ const PaymentInHistory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [payments, setPayments] = useState<any[]>([]);
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [franchiseId, setFranchiseId] = useState(() => localStorage.getItem('franchiseId'));
+
+  // Delete payment handler
+  const handleDeletePayment = async (paymentId: string) => {
+    if (!window.confirm('Are you sure you want to delete this payment?')) return;
+    try {
+      await deletePaymentIn(paymentId);
+      setPayments(prev => prev.filter(payment => payment._id !== paymentId));
+      toast({
+        title: 'Payment Deleted',
+        description: 'The payment has been deleted.',
+        variant: 'default',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to delete payment. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   React.useEffect(() => {
     const handleStorage = () => {
@@ -44,8 +68,7 @@ const PaymentInHistory: React.FC = () => {
     if (!franchiseId) return;
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:8888/Zync-Franc/api/v1/payment-in?franchiseId=${franchiseId}`)
-      .then(res => res.json())
+    getPaymentIns(franchiseId)
       .then(data => {
         if (data.success) {
           // Filter payments by franchiseId on frontend as a safeguard
@@ -143,6 +166,13 @@ const PaymentInHistory: React.FC = () => {
                         title="Edit"
                       >
                         <Pencil size={18} />
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700 transition-colors rounded-full p-1 hover:bg-red-100 ml-2"
+                        onClick={() => handleDeletePayment(payment._id)}
+                        title="Delete"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div></TableCell>
                   </TableRow>

@@ -67,6 +67,22 @@ export async function updatePaymentIn(id: string, paymentIn: Partial<PaymentInDa
   }
 }
 
+export async function deletePaymentIn(id: string, token?: string): Promise<PaymentInResponse> {
+  try {
+    const response = await axios.delete(`${API_URL}/payment-in/${id}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      return error.response.data;
+    }
+    throw error;
+  }
+}
+
 export async function getPaymentInByInvoice(invoiceNumber: string, token?: string): Promise<PaymentInResponse> {
   try {
     const response = await axios.get(`${API_URL}/payment-in/${invoiceNumber}`, {

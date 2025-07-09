@@ -105,7 +105,23 @@ exports.deletePaymentIn = async (req, res) => {
     if (!deletedPayment) {
       return res.status(404).json({ success: false, message: "Payment not found" });
     }
-    res.status(200).json({ success: true, message: "Payment In deleted successfully" });
+
+    // Undo: Increase customer's amountReceivable by amountReceived
+    try {
+      const Customer = require("../models/customer.model");
+      const result = await Customer.findOneAndUpdate(
+        {
+          customerName: deletedPayment.customerName,
+          franchiseId: deletedPayment.franchiseId
+        },
+        { $inc: { amountReceivable: Math.abs(deletedPayment.amountReceived) } }
+      );
+      console.log('[PAYMENT IN DELETE DEBUG] Customer update result:', result);
+    } catch (err) {
+      console.error('[PAYMENT IN DELETE DEBUG] Error updating customer after payment in delete:', err);
+    }
+
+    res.status(200).json({ success: true, message: "Payment In deleted and customer updated successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
