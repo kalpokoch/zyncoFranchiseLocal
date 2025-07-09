@@ -21,8 +21,10 @@ import {
 } from '@/components/ui/pagination';
 import AddProductModal, { ProductData } from '@/components/products/AddProductModal';
 import { useToast } from '@/components/ui/use-toast';
-import { getProducts, addProduct } from '../api/productApi';
+import { getProducts, addProduct, deleteProduct } from '../api/productApi';
 import { useQuery } from '@tanstack/react-query';
+
+import { useQueryClient } from '@tanstack/react-query';
 
 const Inventory: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +36,7 @@ const Inventory: React.FC = () => {
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);  // Add this line
 
+  const queryClient = useQueryClient();
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
@@ -167,6 +170,26 @@ const Inventory: React.FC = () => {
     setIsAddProductModalOpen(false);
   };
 
+  // Delete product handler
+  const handleDeleteProduct = async (item: any) => {
+    if (!window.confirm(`Are you sure you want to delete product "${item.productName}"?`)) return;
+    try {
+      await deleteProduct(item.productId || item._id);
+      toast({
+        title: "Product Deleted",
+        description: `${item.productName} has been deleted successfully.`,
+        variant: "default",
+      });
+      await queryClient.invalidateQueries({ queryKey: ['products'] }); // Only refetch products, no full reload
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : String(error)}</div>;
 
@@ -214,6 +237,7 @@ const Inventory: React.FC = () => {
                 <TableHead>GST</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Edit</TableHead>
+                <TableHead>Delete</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -236,11 +260,22 @@ const Inventory: React.FC = () => {
                         <Edit size={18} />
                       </button>
                     </TableCell>
+                    <TableCell>
+                      <button
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        onClick={() => handleDeleteProduct(item)}
+                        title="Delete Product"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-4">
+                  <TableCell colSpan={10} className="text-center py-4">
                     {isLoading ? (
                       'Loading products...'
                     ) : error ? (

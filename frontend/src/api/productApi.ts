@@ -56,6 +56,19 @@ export const addProduct = async (data: ProductData) => {
   }
 };
 
+// API function to delete a product by ID
+export const deleteProduct = async (id: string) => {
+  try {
+    const response = await apiClient.delete(`/products/${id}`);
+    return response;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || 'Failed to delete product');
+    }
+    throw new Error('An unexpected error occurred');
+  }
+};
+
 // API function to fetch all franchises
 export const getProducts = async () => {
   try {
