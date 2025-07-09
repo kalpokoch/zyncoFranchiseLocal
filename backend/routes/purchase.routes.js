@@ -52,10 +52,41 @@ router.get("/:id", async (req, res) => {
 // Update a purchase by ID
 router.put("/:id", async (req, res) => {
     try {
-        const updatedPurchase = await Purchase.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedPurchase) {
+        // 1. Get old purchase
+        const oldPurchase = await Purchase.findById(req.params.id);
+        if (!oldPurchase) {
             return res.status(404).json({ message: "Purchase not found" });
         }
+        const oldTotal = oldPurchase.totalAmount;
+        const oldSupplierId = oldPurchase.supplier.toString();
+
+        // 2. Update purchase
+        const updatedPurchase = await Purchase.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedPurchase) {
+            return res.status(404).json({ message: "Purchase not found after update" });
+        }
+        const newTotal = updatedPurchase.totalAmount;
+        const newSupplierId = updatedPurchase.supplier.toString();
+
+        // 3. Update supplier(s)
+        if (oldSupplierId === newSupplierId) {
+            // Same supplier, adjust by delta
+            await Supplier.findByIdAndUpdate(
+                oldSupplierId,
+                { $inc: { amountPayable: newTotal - oldTotal } }
+            );
+        } else {
+            // Supplier changed: subtract from old, add to new
+            await Supplier.findByIdAndUpdate(
+                oldSupplierId,
+                { $inc: { amountPayable: -oldTotal } }
+            );
+            await Supplier.findByIdAndUpdate(
+                newSupplierId,
+                { $inc: { amountPayable: newTotal } }
+            );
+        }
+
         res.status(200).json({ message: "Purchase updated successfully", updatedPurchase });
     } catch (error) {
         res.status(500).json({ message: "Error updating purchase", error: error.message });
