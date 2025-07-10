@@ -85,18 +85,18 @@ const Supplier: React.FC = () => {
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
         <h1 className="text-2xl font-bold">Supplier Information</h1>
         <div className="flex gap-2 mt-4 md:mt-0">
-          <ActionButton
+          {/* <ActionButton
             icon={<Plus size={18} />}
             label="Add Sales"
             onClick={() => navigate('/add-sales')}
             className="bg-green-600 hover:bg-green-700 text-white"
-          />
-          <ActionButton
+          /> */}
+          {/* <ActionButton
             icon={<Plus size={18} />}
             label="Add Purchase"
             onClick={() => navigate('/add-purchase')}
             className="bg-blue-600 hover:bg-blue-700 text-white"
-          />
+          /> */}
           <ActionButton
             icon={<Plus size={18} />}
             label="Add New Supplier"

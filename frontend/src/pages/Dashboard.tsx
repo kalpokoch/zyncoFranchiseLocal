@@ -82,15 +82,15 @@ const Dashboard: React.FC = () => {
             icon={<ShoppingCart size={18} />} 
             label="Add Sales" 
             onClick={() => {
-  const franchiseId = localStorage.getItem('franchiseId');
-  if (franchiseId) {
-    navigate(`/${franchiseId}/sales/add`);
-  } else {
-    alert('Franchise ID not found. Please select a franchise.');
-  }
-}} 
+              const franchiseId = localStorage.getItem('franchiseId');
+              if (franchiseId) {
+                navigate(`/${franchiseId}/sales/add`);
+              } else {
+                alert('Franchise ID not found. Please select a franchise.');
+              }
+            }} 
           />
-          <ActionButton 
+          {/* <ActionButton 
             icon={<Plus size={18} />} 
             label="Add Purchase" 
             onClick={() => navigate('/purchase/add')} 
@@ -101,7 +101,7 @@ const Dashboard: React.FC = () => {
             label="Add a new Product" 
             onClick={() => navigate('/inventory/add')} 
             variant="accent" 
-          />
+          /> */}
         </div>
       </div>
       

@@ -147,12 +147,12 @@ const Purchase: React.FC = () => {
         <h1 className="text-2xl font-bold">Purchase History</h1>
 
         <div className="flex gap-2 mt-4 md:mt-0">
-          <Button
+          {/* <Button
             className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
             onClick={() => navigate('/payment-out')}
           >
             <span>Payment Out</span>
-          </Button>
+          </Button> */}
           <ActionButton
             icon={<ShoppingBag size={18} />}
             label="Add Purchase"
