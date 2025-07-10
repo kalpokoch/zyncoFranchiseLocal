@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Supplier } from './supplier.api';
 
 const API_URL = "http://localhost:8888/Zync-Franc/api/v1"; // Changed port to 8888 to match product API
 
@@ -22,6 +23,7 @@ export interface Purchase {
     totalAmount: number;
     balance: number;
     paymentStatus: 'Paid' | 'Pending' | 'Not Paid';
+    supplier?: Supplier;
 }
 
 interface ApiResponse {
